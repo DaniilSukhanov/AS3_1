@@ -15,4 +15,5 @@ struct AppColor {
     static var text: UIColor {
         UITraitCollection.current.userInterfaceStyle == .dark ? .white : .black
     }
+    
 }
