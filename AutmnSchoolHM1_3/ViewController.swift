@@ -13,12 +13,13 @@ class ViewController: UIViewController {
         static let offestUpTitleLabel: CGFloat = 10
         static let verticalPaddingScrollView: CGFloat = 25
         static let spacingMainStackView: CGFloat = 10
+        static let customSpacing: CGFloat = 20
     }
     
     private lazy var textEditor: AutoResizeTextView = {
         let textEditor = AutoResizeTextView()
         textEditor.textColor = AppColor.text
-        textEditor.layer.borderColor = UIColor.red.cgColor
+        textEditor.layer.borderColor = AppColor.text.cgColor
         textEditor.layer.borderWidth = 1
         textEditor.clipsToBounds = true
         return textEditor
@@ -37,19 +38,33 @@ class ViewController: UIViewController {
         return stackView
     }()
     
-    private lazy var labelToggleButtonColoring: UILabel = {
+    private lazy var toggleButtonColoring: UIStackView = {
+        let toggleButtonColoring = UISwitch()
+        toggleButtonColoring.isOn = false
+        toggleButtonColoring.addTarget(self, action: #selector(toggleButtonColoringAction), for: .valueChanged)
+        
+        let spacer = UIView()
+        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        spacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        
         let labelToggleButtonColoring = UILabel()
         labelToggleButtonColoring.text = "Toggle button coloring"
         labelToggleButtonColoring.font = .systemFont(ofSize: 14)
         labelToggleButtonColoring.textColor = AppColor.text
-        return labelToggleButtonColoring
+        
+        let stackView = UIStackView(arrangedSubviews: [labelToggleButtonColoring, spacer, toggleButtonColoring])
+        stackView.axis = .horizontal
+        stackView.alignment = .fill
+        stackView.distribution = .fill
+        return stackView
     }()
     
-    private lazy var toggleButtonColoring: UISwitch = {
-        let toggleButtonColoring = UISwitch()
-        toggleButtonColoring.isOn = false
-        toggleButtonColoring.addTarget(self, action: #selector(toggleButtonColoringAction), for: .valueChanged)
-        return toggleButtonColoring
+    private lazy var sliderSizeFont: UISlider = {
+        let sliderSizeFont = UISlider()
+        sliderSizeFont.minimumValue = 8
+        sliderSizeFont.maximumValue = 72
+        sliderSizeFont.addTarget(self, action: #selector(sliderValueChangedAction), for: .valueChanged)
+        return sliderSizeFont
     }()
     
     override func viewDidLoad() {
@@ -70,18 +85,6 @@ private extension ViewController {
         setupLayoutsScrollView()
         setupLayoutsMainStackView()
         setupLayoutsTextEditor()
-        setupLayoutsToggleButtonColoring()
-    }
-    
-    func setupLayoutsToggleButtonColoring() {
-        let spacer = UIView()
-        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        spacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        let stackView = UIStackView(arrangedSubviews: [labelToggleButtonColoring, spacer, toggleButtonColoring])
-        stackView.axis = .horizontal
-        stackView.alignment = .fill
-        stackView.distribution = .fill
-        mainStackView.addArrangedSubview(stackView)
     }
     
     func setupLayoutsMainStackView() {
@@ -94,6 +97,11 @@ private extension ViewController {
             mainStackView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
             mainStackView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
         ])
+        
+        mainStackView.addArrangedSubview(textEditor)
+        mainStackView.setCustomSpacing(Constant.customSpacing, after: textEditor)
+        mainStackView.addArrangedSubview(toggleButtonColoring)
+        mainStackView.addArrangedSubview(sliderSizeFont)
     }
     
     func setupLayoutsScrollView() {
@@ -108,7 +116,6 @@ private extension ViewController {
     }
     
     func setupLayoutsTextEditor() {
-        mainStackView.addArrangedSubview(textEditor)
         textEditor.translatesAutoresizingMaskIntoConstraints = false
         textEditor.heightAnchor.constraint(greaterThanOrEqualToConstant: Constant.minHeightTextEditor).isActive = true
     }
@@ -150,5 +157,10 @@ private extension ViewController {
     
     @objc func toggleButtonColoringAction(_ sender: UISwitch) {
         textEditor.textColor = sender.isOn ? .red: AppColor.text
+        textEditor.layer.borderColor = sender.isOn ? UIColor.red.cgColor : AppColor.text.cgColor
+    }
+    
+    @objc func sliderValueChangedAction(_ sender: UISlider) {
+        textEditor.font = UIFont.systemFont(ofSize: CGFloat(sender.value))
     }
 }
