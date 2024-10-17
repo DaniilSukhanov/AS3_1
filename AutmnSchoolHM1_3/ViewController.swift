@@ -6,21 +6,29 @@
 //
 
 import UIKit
+import OSLog
 
 class ViewController: UIViewController {
+    private let logger = Logger(subsystem: "AutmnSchoolHM1_3", category: "ViewController")
     private struct Constant {
         static let minHeightTextEditor: CGFloat = 50
         static let offestUpTitleLabel: CGFloat = 10
         static let verticalPaddingScrollView: CGFloat = 25
         static let spacingMainStackView: CGFloat = 10
         static let customSpacing: CGFloat = 20
+        static let heightSubmitButton: CGFloat = 50
+        static let widthSubmitButton: CGFloat = 90
+        static let botomPaddingSubmitButton: CGFloat = 20
+        static let cornerRadius: CGFloat = 10
     }
     
-    private lazy var textEditor: AutoResizeTextView = {
-        let textEditor = AutoResizeTextView()
+    private lazy var textEditor: UITextView = {
+        let textEditor = UITextView()
+        textEditor.isScrollEnabled = false
         textEditor.textColor = AppColor.text
         textEditor.layer.borderColor = AppColor.text.cgColor
         textEditor.layer.borderWidth = 1
+        textEditor.layer.cornerRadius = Constant.cornerRadius
         textEditor.clipsToBounds = true
         return textEditor
     }()
@@ -48,7 +56,7 @@ class ViewController: UIViewController {
         spacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         
         let labelToggleButtonColoring = UILabel()
-        labelToggleButtonColoring.text = "Toggle button coloring"
+        labelToggleButtonColoring.text = "is red text"
         labelToggleButtonColoring.font = .systemFont(ofSize: 14)
         labelToggleButtonColoring.textColor = AppColor.text
         
@@ -67,12 +75,25 @@ class ViewController: UIViewController {
         return sliderSizeFont
     }()
     
+    private lazy var submitButton: UIButton = {
+        let submitButton = UIButton()
+        submitButton.setTitle("Submit", for: .normal)
+        submitButton.setTitleColor(AppColor.text, for: .normal)
+        submitButton.backgroundColor = .blue
+        submitButton.layer.cornerRadius = Constant.cornerRadius
+        submitButton.addTarget(self, action: #selector(submitRemoveOpacityAction), for: .touchUpInside)
+        submitButton.addTarget(self, action: #selector(submitOpacityAction), for: .touchDown)
+        submitButton.addTarget(self, action: #selector (submitRemoveOpacityAction), for: .touchUpOutside)
+        submitButton.addTarget(self, action: #selector(submitAction), for: .touchUpInside)
+        return submitButton
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupLayouts()
         setupAction()
-        title = "Test"
         
+        title = "Editor"
         view.backgroundColor = AppColor.backgroudView
     }
     
@@ -85,6 +106,7 @@ private extension ViewController {
         setupLayoutsScrollView()
         setupLayoutsMainStackView()
         setupLayoutsTextEditor()
+        setupLayoutsSubmitButton()
     }
     
     func setupLayoutsMainStackView() {
@@ -119,6 +141,17 @@ private extension ViewController {
         textEditor.translatesAutoresizingMaskIntoConstraints = false
         textEditor.heightAnchor.constraint(greaterThanOrEqualToConstant: Constant.minHeightTextEditor).isActive = true
     }
+    
+    func setupLayoutsSubmitButton() {
+        view.addSubview(submitButton)
+        submitButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            submitButton.heightAnchor.constraint(equalToConstant: Constant.heightSubmitButton),
+            submitButton.widthAnchor.constraint(equalToConstant: Constant.widthSubmitButton),
+            submitButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -Constant.botomPaddingSubmitButton),
+            submitButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        ])
+    }
 }
             
 // MARK: - Setup actions
@@ -152,15 +185,36 @@ extension ViewController: UIGestureRecognizerDelegate {
 
 private extension ViewController {
     @objc func removeFocuseTextEditor(_ sender: UITapGestureRecognizer) {
+        logger.debug("Tap on remove focuse text editor")
         view.endEditing(true)
     }
     
     @objc func toggleButtonColoringAction(_ sender: UISwitch) {
+        logger.debug("toggle button coloring: \(sender.isOn)")
         textEditor.textColor = sender.isOn ? .red: AppColor.text
         textEditor.layer.borderColor = sender.isOn ? UIColor.red.cgColor : AppColor.text.cgColor
     }
     
     @objc func sliderValueChangedAction(_ sender: UISlider) {
+        logger.debug("Sliper value: \(sender.value)")
         textEditor.font = UIFont.systemFont(ofSize: CGFloat(sender.value))
+    }
+    
+    @objc func submitOpacityAction() {
+        logger.debug("Tap on submit opacity")
+        submitButton.layer.opacity = 0.5
+    }
+    
+    @objc func submitRemoveOpacityAction() {
+        logger.debug("Tap on remove submit opacity")
+        submitButton.layer.opacity = 1
+    }
+    
+    @objc func submitAction() {
+        if let text = textEditor.text {
+            logger.info("Text: \(text)")
+        } else {
+            logger.warning("Text is nil!")
+        }
     }
 }
