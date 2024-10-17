@@ -20,6 +20,8 @@ class ViewController: UIViewController {
         static let widthSubmitButton: CGFloat = 90
         static let botomPaddingSubmitButton: CGFloat = 20
         static let cornerRadius: CGFloat = 10
+        static let verticalPaddingPlaceholderTextEditor: CGFloat = 5
+        static let leadingPaddingPlaceholderTextEditor: CGFloat = 3
     }
     
     private lazy var textEditor: UITextView = {
@@ -30,6 +32,7 @@ class ViewController: UIViewController {
         textEditor.layer.borderWidth = 1
         textEditor.layer.cornerRadius = Constant.cornerRadius
         textEditor.clipsToBounds = true
+        textEditor.delegate = self
         return textEditor
     }()
     
@@ -37,6 +40,14 @@ class ViewController: UIViewController {
         let scrollView = UIScrollView()
         
         return scrollView
+    }()
+    
+    private lazy var placeholderTextEditor: UILabel = {
+        let placeholderTextEditor = UILabel()
+        placeholderTextEditor.text = "Enter text"
+        placeholderTextEditor.textColor = AppColor.text.withAlphaComponent(0.3)
+        placeholderTextEditor.font = textEditor.font ?? (UIFont.systemFont(ofSize: CGFloat(sliderSizeFont.value)))
+        return placeholderTextEditor
     }()
     
     private lazy var mainStackView: UIStackView = {
@@ -107,6 +118,7 @@ private extension ViewController {
         setupLayoutsMainStackView()
         setupLayoutsTextEditor()
         setupLayoutsSubmitButton()
+        setupLayoutsPlaceholderTextEditor()
     }
     
     func setupLayoutsMainStackView() {
@@ -152,6 +164,17 @@ private extension ViewController {
             submitButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
     }
+    
+    func setupLayoutsPlaceholderTextEditor() {
+        textEditor.addSubview(placeholderTextEditor)
+        placeholderTextEditor.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            placeholderTextEditor.leadingAnchor.constraint(equalTo: textEditor.safeAreaLayoutGuide.leadingAnchor, constant: Constant.leadingPaddingPlaceholderTextEditor),
+            placeholderTextEditor.topAnchor.constraint(equalTo: textEditor.safeAreaLayoutGuide.topAnchor, constant: Constant.verticalPaddingPlaceholderTextEditor),
+            placeholderTextEditor.bottomAnchor.constraint(lessThanOrEqualTo: textEditor.safeAreaLayoutGuide.bottomAnchor, constant: -Constant.verticalPaddingPlaceholderTextEditor),
+       ])
+    }
 }
             
 // MARK: - Setup actions
@@ -181,6 +204,12 @@ extension ViewController: UIGestureRecognizerDelegate {
     }
 }
 
+extension ViewController: UITextViewDelegate {
+    func textViewDidChange(_ textView: UITextView) {
+        placeholderTextEditor.isHidden = !textEditor.text.isEmpty
+    }
+}
+
 // MARK: - Actions
 
 private extension ViewController {
@@ -191,13 +220,16 @@ private extension ViewController {
     
     @objc func toggleButtonColoringAction(_ sender: UISwitch) {
         logger.debug("toggle button coloring: \(sender.isOn)")
-        textEditor.textColor = sender.isOn ? .red: AppColor.text
+        textEditor.textColor = sender.isOn ? .red : AppColor.text
         textEditor.layer.borderColor = sender.isOn ? UIColor.red.cgColor : AppColor.text.cgColor
+        placeholderTextEditor.textColor = sender.isOn ? .red.withAlphaComponent(0.3) : AppColor.text.withAlphaComponent(0.3)
     }
     
     @objc func sliderValueChangedAction(_ sender: UISlider) {
         logger.debug("Sliper value: \(sender.value)")
-        textEditor.font = UIFont.systemFont(ofSize: CGFloat(sender.value))
+        let font =  UIFont.systemFont(ofSize: CGFloat(sender.value))
+        textEditor.font = font
+        placeholderTextEditor.font = font
     }
     
     @objc func submitOpacityAction() {
