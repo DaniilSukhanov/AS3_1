@@ -12,6 +12,7 @@ class ViewController: UIViewController {
         static let minHeightTextEditor: CGFloat = 50
         static let offestUpTitleLabel: CGFloat = 10
         static let verticalPaddingScrollView: CGFloat = 25
+        static let spacingMainStackView: CGFloat = 10
     }
     
     private lazy var textEditor: AutoResizeTextView = {
@@ -32,8 +33,23 @@ class ViewController: UIViewController {
     private lazy var mainStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
-        stackView.spacing = 10
+        stackView.spacing = Constant.spacingMainStackView
         return stackView
+    }()
+    
+    private lazy var labelToggleButtonColoring: UILabel = {
+        let labelToggleButtonColoring = UILabel()
+        labelToggleButtonColoring.text = "Toggle button coloring"
+        labelToggleButtonColoring.font = .systemFont(ofSize: 14)
+        labelToggleButtonColoring.textColor = AppColor.text
+        return labelToggleButtonColoring
+    }()
+    
+    private lazy var toggleButtonColoring: UISwitch = {
+        let toggleButtonColoring = UISwitch()
+        toggleButtonColoring.isOn = false
+        toggleButtonColoring.addTarget(self, action: #selector(toggleButtonColoringAction), for: .valueChanged)
+        return toggleButtonColoring
     }()
     
     override func viewDidLoad() {
@@ -41,10 +57,9 @@ class ViewController: UIViewController {
         setupLayouts()
         setupAction()
         title = "Test"
+        
         view.backgroundColor = AppColor.backgroudView
     }
-    
-    
     
 }
 
@@ -55,6 +70,18 @@ private extension ViewController {
         setupLayoutsScrollView()
         setupLayoutsMainStackView()
         setupLayoutsTextEditor()
+        setupLayoutsToggleButtonColoring()
+    }
+    
+    func setupLayoutsToggleButtonColoring() {
+        let spacer = UIView()
+        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        spacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        let stackView = UIStackView(arrangedSubviews: [labelToggleButtonColoring, spacer, toggleButtonColoring])
+        stackView.axis = .horizontal
+        stackView.alignment = .fill
+        stackView.distribution = .fill
+        mainStackView.addArrangedSubview(stackView)
     }
     
     func setupLayoutsMainStackView() {
@@ -119,5 +146,9 @@ extension ViewController: UIGestureRecognizerDelegate {
 private extension ViewController {
     @objc func removeFocuseTextEditor(_ sender: UITapGestureRecognizer) {
         view.endEditing(true)
+    }
+    
+    @objc func toggleButtonColoringAction(_ sender: UISwitch) {
+        textEditor.textColor = sender.isOn ? .red: AppColor.text
     }
 }
