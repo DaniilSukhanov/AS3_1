@@ -7,13 +7,17 @@
 
 import UIKit
 
-struct AppColor {
+enum AppColor {
     static var backgroudView: UIColor {
         UITraitCollection.current.userInterfaceStyle == .dark ? .black : .white
     }
     
-    static var text: UIColor {
+    static var textColor: UIColor {
         UITraitCollection.current.userInterfaceStyle == .dark ? .white : .black
+    }
+    
+    static var backgroudViewButton: UIColor {
+        UITraitCollection.current.userInterfaceStyle == .dark ? .blue : .cyan
     }
     
 }
